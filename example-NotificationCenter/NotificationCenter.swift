@@ -66,8 +66,8 @@ struct BookNotificationCenter: View, PreviewProvider {
             NotificationCell(title: notification.title, message: notification.message)
           case let .group(group):
             NotificationGroupCell(notificationGroup: group, namespace: namespace)
-          }
-        }
+          }          
+        }      
         .transition(.opacity.animation(.spring))
         .scrollTransition(
           topLeading: .identity,
@@ -109,8 +109,15 @@ private struct NotificationCell: View {
       Spacer()
     }
     .padding()
-    .background(Color(.secondarySystemBackground))
+    .background(Color(.secondarySystemBackground))   
     .cornerRadius(16)
+    .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 16))
+    .contextMenu(menuItems: { 
+      Button("TODO") {
+        
+      }
+    })
+  
   }
 
 }
@@ -142,10 +149,9 @@ private struct NotificationGroupCell: View {
         FolderCell(
           notificationGroup: notificationGroup,
           namespace: namespace
-        )
+        )       
       },
-      content: {
-        
+      content: {        
         ForEach(IndexedCollection(notificationGroup.contents), id: \.id) { e in
           let notification = e.value
 
@@ -281,20 +287,9 @@ private struct NotificationGroupCell: View {
             .matchedGeometryEffect(id: Optional(secondID), in: namespace, isSource: true)
             .padding(.horizontal, 8)
         }
-
-        HStack {
-          VStack(alignment: .leading) {
-            Text(title)
-              .font(.headline)
-            Text(message)
-              .font(.subheadline)
-          }
-          Spacer()
-        }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(16)
-        .matchedGeometryEffect(id: firstID, in: namespace, isSource: true)
+        
+        NotificationCell(title: title, message: message)
+        .matchedGeometryEffect(id: firstID, in: namespace, isSource: true)       
       }
       .padding(
         .bottom,
