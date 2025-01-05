@@ -1,7 +1,7 @@
 import SwiftUI
 import IndexedCollection
 
-public struct ReversedZIndex<Content: View>: View {
+public struct ReversedZIndexGroup<Content: View>: View {
   
   private let content: Content
   
