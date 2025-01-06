@@ -58,7 +58,7 @@ struct BookNotificationCenter: View, PreviewProvider {
 
     var body: some View {
 
-      Group {
+      ReversedZIndexGroup {
 
         ForEach(notifications.nodes) { notification in
           switch notification {
@@ -99,23 +99,27 @@ private struct NotificationCell: View {
   }
 
   var body: some View {
-    HStack {
-      VStack(alignment: .leading) {
-        Text(title)
-          .font(.headline)
-        Text(message)
-          .font(.subheadline)
+    ZStack {
+      Color(.secondarySystemBackground)
+      HStack {
+        VStack(alignment: .leading) {
+          Text(title)
+            .font(.headline)
+          Text(message)
+            .font(.subheadline)
+        }
+        Spacer()
       }
-      Spacer()
-    }
-    .padding()
-    .background(Color(.secondarySystemBackground))   
+      .padding()
+    }  
     .cornerRadius(16)
     .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 16))
     .contextMenu(menuItems: { 
-      Button("TODO") {
+      Button("An Action") {
         
       }
+    }, preview: {
+      Text("TODO: Preview")
     })
   
   }
@@ -142,6 +146,8 @@ private struct NotificationGroupCell: View {
   }
 
   var body: some View {
+    
+    let animation = Animation.spring(duration: 3)
 
     FolderGroup(
       isFolded: isFolded,
@@ -178,27 +184,32 @@ private struct NotificationGroupCell: View {
         Spacer(minLength: 44).fixedSize()
       },
       onOpen: {
-        withAnimation(.spring) {
+        withAnimation(animation) {
           isFolded = false
         }
 
         withPrerender {
-          withAnimation(.spring()) {
+          withAnimation(animation) {
             useStackingID = false
           }
         }
 
       },
       onClose: {
-        withAnimation(.spring()) {
+        
+        withAnimation(animation) {
           useStackingID = true
         }
 
-        withPrerender {
-          withAnimation(.spring) {
-            isFolded = true
+        Task {
+          try? await Task.sleep(nanoseconds: 500_000_000)
+          withPrerender {
+            withAnimation(animation) {
+              isFolded = true
+            }
           }
         }
+               
       }
     )
     .sensoryFeedback(.selection, trigger: isFolded)
@@ -272,24 +283,24 @@ private struct NotificationGroupCell: View {
 
         if let thirdID = thirdID {
           RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground))
+            .matchedGeometryEffect(id: Optional(thirdID), in: namespace)
             .opacity(0.4)
-            .offset(y: 24)
+            .offset(y: 20)
             .compositingGroup()
             .padding(.horizontal, 16)
-            .matchedGeometryEffect(id: Optional(thirdID), in: namespace)
         }
 
         if let secondID = secondID {
           RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground))
+            .matchedGeometryEffect(id: Optional(secondID), in: namespace)
             .opacity(0.6)
-            .offset(y: 12)
+            .offset(y: 10)
             .compositingGroup()
-            .matchedGeometryEffect(id: Optional(secondID), in: namespace, isSource: true)
             .padding(.horizontal, 8)
         }
         
         NotificationCell(title: title, message: message)
-        .matchedGeometryEffect(id: firstID, in: namespace, isSource: true)       
+          .matchedGeometryEffect(id: firstID, in: namespace)       
       }
       .padding(
         .bottom,
